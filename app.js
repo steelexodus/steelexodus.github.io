@@ -31,16 +31,25 @@ const appScreen = document.getElementById("app");
 const roomList = document.getElementById("roomList");
 const messagesDiv = document.getElementById("messages");
 
-document.getElementById("loginBtn").onclick = async () => {
-  const email = email.value;
-  const password = password.value;
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const emailInput = document.getElementById("email").value;
+  const passwordInput = document.getElementById("password").value;
+
+  if (!emailInput || !passwordInput) {
+    alert("Please enter email and password.");
+    return;
+  }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch {
-    await createUserWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, emailInput, passwordInput);
+  } catch (error) {
+    try {
+      await createUserWithEmailAndPassword(auth, emailInput, passwordInput);
+    } catch (err) {
+      alert(err.message);
+    }
   }
-};
+});
 
 document.getElementById("logoutBtn").onclick = () => signOut(auth);
 

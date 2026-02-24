@@ -1,63 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Realtime Chat</title>
-  <style>
-    body { font-family: Arial; background: #1e1e1e; color: white; }
-    #chat { height: 300px; overflow-y: scroll; border: 1px solid #444; padding: 10px; }
-    input { padding: 10px; margin: 5px 0; width: 100%; }
-    button { padding: 10px; width: 100%; background: #5865F2; color: white; border: none; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Chatly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
-<h2>Realtime Chat</h2>
+<div id="authScreen">
+  <h2>Login / Register</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button id="loginBtn">Login / Register</button>
+</div>
 
-<input id="username" placeholder="Username">
-<div id="chat"></div>
-<input id="message" placeholder="Type message">
-<button onclick="sendMessage()">Send</button>
+<div id="app" class="hidden">
+  <div id="sidebar">
+    <h3>Rooms</h3>
+    <ul id="roomList"></ul>
+    <button id="createRoomBtn">+ Create Room</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } 
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <div id="main">
+    <div id="messages"></div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCC2RQ6EzqvK5NDmn5cqeaPTN50SP9dhWc",
-    authDomain: "chatly-859d4.firebaseapp.com",
-    projectId: "1:789971075837:web:8d6328b14136565588b494",
-  };
+    <div id="typingIndicator"></div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    <div id="inputArea">
+      <input id="messageInput" placeholder="Type a message...">
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+</div>
 
-  const chat = document.getElementById("chat");
-
-  const q = query(collection(db, "messages"), orderBy("timestamp"));
-  onSnapshot(q, (snapshot) => {
-    chat.innerHTML = "";
-    snapshot.forEach((doc) => {
-      const msg = doc.data();
-      chat.innerHTML += `<p><strong>${msg.user}:</strong> ${msg.text}</p>`;
-    });
-  });
-
-  window.sendMessage = async function () {
-    const user = document.getElementById("username").value;
-    const text = document.getElementById("message").value;
-
-    if (!user || !text) return;
-
-    await addDoc(collection(db, "messages"), {
-      user: user,
-      text: text,
-      timestamp: Date.now()
-    });
-
-    document.getElementById("message").value = "";
-  };
-</script>
-
+<script type="module" src="app.js"></script>
 </body>
 </html>

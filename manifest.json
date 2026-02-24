@@ -1,0 +1,9 @@
+{
+  "name": "Chatly",
+  "short_name": "Chatly",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#2b2d31",
+  "theme_color": "#5865F2",
+  "icons": []
+}

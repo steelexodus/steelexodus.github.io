@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Realtime Chat</title>
+  <style>
+    body { font-family: Arial; background: #1e1e1e; color: white; }
+    #chat { height: 300px; overflow-y: scroll; border: 1px solid #444; padding: 10px; }
+    input { padding: 10px; margin: 5px 0; width: 100%; }
+    button { padding: 10px; width: 100%; background: #5865F2; color: white; border: none; }
+  </style>
+</head>
+<body>
+
+<h2>Realtime Chat</h2>
+
+<input id="username" placeholder="Username">
+<div id="chat"></div>
+<input id="message" placeholder="Type message">
+<button onclick="sendMessage()">Send</button>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } 
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const chat = document.getElementById("chat");
+
+  const q = query(collection(db, "messages"), orderBy("timestamp"));
+  onSnapshot(q, (snapshot) => {
+    chat.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const msg = doc.data();
+      chat.innerHTML += `<p><strong>${msg.user}:</strong> ${msg.text}</p>`;
+    });
+  });
+
+  window.sendMessage = async function () {
+    const user = document.getElementById("username").value;
+    const text = document.getElementById("message").value;
+
+    if (!user || !text) return;
+
+    await addDoc(collection(db, "messages"), {
+      user: user,
+      text: text,
+      timestamp: Date.now()
+    });
+
+    document.getElementById("message").value = "";
+  };
+</script>
+
+</body>
+</html>

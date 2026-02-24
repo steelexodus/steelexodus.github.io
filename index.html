@@ -3,1279 +3,174 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chord — Chat</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    /* ─── CSS Variables ─────────────────────────── */
-    :root {
-      --bg-void:     #0a0b0f;
-      --bg-server:   #111218;
-      --bg-sidebar:  #15161e;
-      --bg-main:     #1a1b25;
-      --bg-input:    #0f1018;
-      --bg-hover:    #1f2030;
-      --bg-active:   #252737;
-      --bg-msg:      #1d1e2c;
-
-      --accent:      #7c6fff;
-      --accent-glow: #7c6fff44;
-      --accent-dim:  #5a4fd6;
-      --online:      #3dd68c;
-      --away:        #f0b429;
-      --mention:     #ff6b6b;
-
-      --text-primary:   #e8e9f3;
-      --text-secondary: #8b8fa8;
-      --text-muted:     #55576b;
-      --text-link:      #7c9fff;
-
-      --border:         #1f2135;
-      --border-light:   #2a2d44;
-
-      --radius-sm: 4px;
-      --radius-md: 8px;
-      --radius-lg: 12px;
-      --radius-xl: 18px;
-
-      --font-ui: 'Outfit', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --sidebar-w: 240px;
-      --server-w: 68px;
-      --userlist-w: 220px;
-    }
-
-    /* ─── Reset ─────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; }
-    body {
-      font-family: var(--font-ui);
-      background: var(--bg-void);
-      color: var(--text-primary);
-      display: flex;
-      height: 100vh;
-    }
-    button { cursor: pointer; font-family: inherit; border: none; outline: none; }
-    input, textarea { font-family: inherit; outline: none; border: none; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-    /* ─── Login Screen ───────────────────────────── */
-    #login-screen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg-void);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      gap: 0;
-    }
-
-    .login-bg {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .login-bg::before {
-      content: '';
-      position: absolute;
-      top: -20%;
-      left: 30%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, #7c6fff18 0%, transparent 70%);
-      border-radius: 50%;
-      animation: pulse 4s ease-in-out infinite;
-    }
-    .login-bg::after {
-      content: '';
-      position: absolute;
-      bottom: -10%;
-      right: 10%;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, #3dd68c0d 0%, transparent 70%);
-      border-radius: 50%;
-      animation: pulse 6s ease-in-out infinite reverse;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50% { transform: scale(1.15); opacity: 1; }
-    }
-
-    .login-card {
-      position: relative;
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-xl);
-      padding: 48px 44px;
-      width: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 28px;
-      box-shadow: 0 32px 80px #0008, 0 0 0 1px #ffffff06 inset;
-    }
-
-    .login-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .login-logo-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--accent);
-      border-radius: var(--radius-lg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 24px var(--accent-glow);
-    }
-    .login-logo-icon svg { width: 26px; height: 26px; fill: white; }
-    .login-logo-text {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .login-card h2 {
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--text-secondary);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .btn-github {
-      width: 100%;
-      padding: 14px;
-      background: #24292e;
-      border: 1px solid #444c56;
-      border-radius: var(--radius-md);
-      color: #e6edf3;
-      font-size: 15px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-      box-shadow: 0 2px 8px #0005;
-    }
-    .btn-github:hover { background: #2d333b; box-shadow: 0 4px 16px #0007; transform: translateY(-1px); }
-    .btn-github:active { transform: translateY(0); }
-    .btn-github svg { width: 20px; height: 20px; fill: currentColor; }
-
-    .login-footer {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.6;
-    }
-
-    /* ─── App Layout ─────────────────────────────── */
-    #app { display: flex; width: 100%; height: 100vh; opacity: 0; transition: opacity 0.3s; }
-    #app.visible { opacity: 1; }
-
-    /* ─── Server Rail ────────────────────────────── */
-    #server-rail {
-      width: var(--server-w);
-      min-width: var(--server-w);
-      background: var(--bg-server);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px 0;
-      gap: 8px;
-      overflow-y: auto;
-      border-right: 1px solid var(--border);
-    }
-
-    .server-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      background: var(--bg-sidebar);
-      border: 2px solid transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--text-secondary);
-      transition: border-radius 0.2s, background 0.15s, border-color 0.15s, color 0.15s;
-      position: relative;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-    .server-icon img { width: 100%; height: 100%; object-fit: cover; }
-    .server-icon:hover, .server-icon.active {
-      border-radius: var(--radius-lg);
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-    .server-icon.active::before {
-      content: '';
-      position: absolute;
-      left: -16px;
-      width: 4px;
-      height: 70%;
-      background: white;
-      border-radius: 0 4px 4px 0;
-    }
-
-    .server-divider {
-      width: 32px;
-      height: 2px;
-      background: var(--border-light);
-      border-radius: 1px;
-      flex-shrink: 0;
-    }
-
-    .server-add {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      background: var(--bg-sidebar);
-      color: var(--online);
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: border-radius 0.2s, background 0.15s;
-      flex-shrink: 0;
-    }
-    .server-add:hover { border-radius: var(--radius-lg); background: var(--online); color: white; }
-
-    /* ─── Channel Sidebar ────────────────────────── */
-    #channel-sidebar {
-      width: var(--sidebar-w);
-      min-width: var(--sidebar-w);
-      background: var(--bg-sidebar);
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--border);
-    }
-
-    .sidebar-header {
-      padding: 16px;
-      font-size: 15px;
-      font-weight: 700;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      letter-spacing: -0.2px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .sidebar-header:hover { background: var(--bg-hover); }
-    .sidebar-header .chevron { color: var(--text-muted); font-size: 12px; }
-
-    .channel-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 0;
-    }
-
-    .channel-group-label {
-      padding: 12px 16px 4px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-    .channel-group-label:hover { color: var(--text-secondary); }
-    .channel-group-label .add-ch { font-size: 16px; line-height: 1; }
-
-    .channel-item {
-      padding: 7px 16px;
-      margin: 1px 8px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 500;
-      transition: background 0.12s, color 0.12s;
-      position: relative;
-    }
-    .channel-item:hover { background: var(--bg-hover); color: var(--text-secondary); }
-    .channel-item.active { background: var(--bg-active); color: var(--text-primary); }
-    .channel-item .ch-hash { color: var(--text-muted); font-size: 18px; line-height: 1; font-weight: 300; flex-shrink: 0; }
-    .channel-item.active .ch-hash { color: var(--text-secondary); }
-    .channel-item .unread-badge {
-      margin-left: auto;
-      background: var(--mention);
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 10px;
-      min-width: 18px;
-      text-align: center;
-    }
-
-    .sidebar-user-panel {
-      padding: 10px 8px;
-      background: var(--bg-server);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-top: 1px solid var(--border);
-    }
-    .sidebar-user-panel .user-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .sidebar-user-panel .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .sidebar-user-panel .user-avatar .status-dot {
-      position: absolute;
-      bottom: -1px;
-      right: -1px;
-      width: 12px;
-      height: 12px;
-      background: var(--online);
-      border: 2px solid var(--bg-server);
-      border-radius: 50%;
-    }
-    .sidebar-user-panel .user-info { flex: 1; min-width: 0; }
-    .sidebar-user-panel .user-info .uname { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sidebar-user-panel .user-info .ustatus { font-size: 11px; color: var(--text-muted); }
-    .sidebar-user-panel .panel-btn {
-      background: none;
-      color: var(--text-muted);
-      font-size: 16px;
-      padding: 4px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      transition: color 0.12s, background 0.12s;
-    }
-    .sidebar-user-panel .panel-btn:hover { color: var(--text-secondary); background: var(--bg-hover); }
-
-    /* ─── Main Chat Area ─────────────────────────── */
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-main);
-      min-width: 0;
-    }
-
-    /* ─── Chat Header ────────────────────────────── */
-    #chat-header {
-      height: 52px;
-      padding: 0 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-main);
-      backdrop-filter: blur(0);
-      flex-shrink: 0;
-    }
-    #chat-header .ch-name {
-      font-size: 16px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    #chat-header .ch-hash-lrg { font-size: 22px; color: var(--text-muted); font-weight: 300; }
-    #chat-header .ch-topic {
-      font-size: 13px;
-      color: var(--text-muted);
-      padding-left: 12px;
-      border-left: 1px solid var(--border-light);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 300px;
-    }
-    #chat-header .header-actions {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .header-btn {
-      background: none;
-      color: var(--text-muted);
-      padding: 6px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      font-size: 20px;
-      transition: color 0.12s, background 0.12s;
-    }
-    .header-btn:hover { color: var(--text-secondary); background: var(--bg-hover); }
-    .header-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-    /* ─── Messages Area ──────────────────────────── */
-    #messages-area {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px 0 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    .welcome-banner {
-      margin: 0 20px 24px;
-      padding: 20px;
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-    }
-    .welcome-banner .wb-icon {
-      font-size: 40px;
-      margin-bottom: 8px;
-    }
-    .welcome-banner h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .welcome-banner p { font-size: 14px; color: var(--text-secondary); }
-
-    .message-group {
-      padding: 6px 20px;
-      display: flex;
-      gap: 14px;
-      transition: background 0.1s;
-    }
-    .message-group:hover { background: var(--bg-msg); }
-    .msg-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      background: var(--accent-dim);
-      overflow: hidden;
-      cursor: pointer;
-      margin-top: 2px;
-    }
-    .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .msg-body { flex: 1; min-width: 0; }
-    .msg-meta {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 3px;
-    }
-    .msg-author {
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--text-primary);
-    }
-    .msg-author:hover { text-decoration: underline; }
-    .msg-author.is-bot { color: var(--accent); }
-    .msg-time {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-    }
-    .msg-content {
-      font-size: 14.5px;
-      line-height: 1.55;
-      color: var(--text-primary);
-      word-break: break-word;
-    }
-    .msg-content code {
-      font-family: var(--font-mono);
-      background: var(--bg-void);
-      padding: 2px 5px;
-      border-radius: 3px;
-      font-size: 13px;
-      color: #e07b7b;
-    }
-    .msg-content pre {
-      background: var(--bg-void);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      margin-top: 6px;
-      overflow-x: auto;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .msg-reactions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 6px;
-    }
-    .reaction {
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-sm);
-      padding: 3px 8px;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: background 0.12s;
-    }
-    .reaction:hover { background: var(--bg-active); border-color: var(--accent); }
-    .reaction.mine { background: var(--accent-glow); border-color: var(--accent); }
-
-    .date-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 20px 8px;
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .date-divider::before, .date-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* ─── Typing Indicator ───────────────────────── */
-    #typing-indicator {
-      height: 24px;
-      padding: 0 22px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    .typing-dots { display: flex; gap: 3px; }
-    .typing-dots span {
-      width: 5px; height: 5px;
-      background: var(--text-muted);
-      border-radius: 50%;
-      animation: bounce 1.2s ease-in-out infinite;
-    }
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-5px); }
-    }
-
-    /* ─── Message Input ──────────────────────────── */
-    #message-input-area {
-      padding: 0 20px 20px;
-      flex-shrink: 0;
-    }
-    .input-wrapper {
-      background: var(--bg-input);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      display: flex;
-      align-items: flex-end;
-      gap: 0;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .input-wrapper:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-    .input-btn {
-      background: none;
-      color: var(--text-muted);
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      font-size: 20px;
-      transition: color 0.12s;
-      flex-shrink: 0;
-    }
-    .input-btn:hover { color: var(--accent); }
-    .input-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    #message-input {
-      flex: 1;
-      background: none;
-      color: var(--text-primary);
-      font-size: 14.5px;
-      padding: 12px 0;
-      resize: none;
-      max-height: 180px;
-      min-height: 20px;
-      line-height: 1.5;
-    }
-    #message-input::placeholder { color: var(--text-muted); }
-    .send-btn {
-      background: none;
-      color: var(--text-muted);
-      padding: 10px 12px;
-      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-      display: flex;
-      align-items: center;
-      transition: color 0.12s, background 0.12s;
-      flex-shrink: 0;
-    }
-    .send-btn:hover { color: var(--accent); }
-    .send-btn.active { color: var(--accent); }
-    .send-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-    /* ─── Member Sidebar ─────────────────────────── */
-    #member-sidebar {
-      width: var(--userlist-w);
-      min-width: var(--userlist-w);
-      background: var(--bg-sidebar);
-      border-left: 1px solid var(--border);
-      overflow-y: auto;
-      padding: 16px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-    .member-group-label {
-      padding: 8px 16px 4px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    .member-item {
-      padding: 6px 12px;
-      margin: 1px 6px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: background 0.12s;
-    }
-    .member-item:hover { background: var(--bg-hover); }
-    .member-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--accent-dim);
-      flex-shrink: 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .member-avatar .member-status {
-      position: absolute;
-      bottom: -1px;
-      right: -1px;
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      border: 2px solid var(--bg-sidebar);
-    }
-    .member-status.online { background: var(--online); }
-    .member-status.idle { background: var(--away); }
-    .member-status.offline { background: var(--text-muted); }
-    .member-name { font-size: 13.5px; font-weight: 500; color: var(--text-secondary); }
-    .member-item:hover .member-name { color: var(--text-primary); }
-
-    /* ─── Emoji Picker ───────────────────────────── */
-    #emoji-picker {
-      position: absolute;
-      bottom: 80px;
-      left: 80px;
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: 12px;
-      display: none;
-      flex-wrap: wrap;
-      width: 260px;
-      gap: 4px;
-      box-shadow: 0 16px 40px #0006;
-      z-index: 100;
-    }
-    #emoji-picker.open { display: flex; }
-    .emoji-btn {
-      background: none;
-      font-size: 22px;
-      padding: 5px;
-      border-radius: var(--radius-sm);
-      transition: background 0.1s, transform 0.1s;
-    }
-    .emoji-btn:hover { background: var(--bg-hover); transform: scale(1.2); }
-
-    /* ─── Toast ──────────────────────────────────── */
-    #toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
-      padding: 10px 18px;
-      font-size: 13px;
-      color: var(--text-primary);
-      box-shadow: 0 8px 24px #0006;
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      z-index: 9999;
-      pointer-events: none;
-    }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ─── Utilities ──────────────────────────────── */
-    .hidden { display: none !important; }
-    .flex-1 { flex: 1; }
-  </style>
+  <title>Chatly</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f8ef7'/><text y='22' x='7' font-size='18'>💬</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<!-- ══════════════════════════ LOGIN ══════════════════════════ -->
 <div id="login-screen">
   <div class="login-bg"></div>
   <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-icon">
-        <!-- Wave/chord icon -->
-        <svg viewBox="0 0 24 24"><path d="M2 12 Q6 4, 10 12 Q14 20, 18 12 Q20 7, 22 12" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
-      </div>
-      <span class="login-logo-text">Chord</span>
+
+    <div class="login-brand">
+      <div class="login-logo">💬</div>
+      <div class="login-wordmark">Chatly</div>
     </div>
 
-    <h2>Welcome back!<br/>Sign in to continue chatting.</h2>
+    <p class="login-tagline">Real-time chat for your team.<br/>Sign in to get started.</p>
 
-    <button class="btn-github" onclick="signInWithGitHub()">
-      <svg viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-      Continue with GitHub
-    </button>
+    <div class="login-providers">
+      <!-- GitHub -->
+      <button class="login-btn btn-github" onclick="app.signInWithGitHub()">
+        <svg viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        Continue with GitHub
+      </button>
 
-    <p class="login-footer">By signing in you agree to our Terms.<br/>Your data is stored in Firebase.</p>
+      <!-- Google -->
+      <button class="login-btn btn-google" onclick="app.signInWithGoogle()">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <!-- Microsoft -->
+      <button class="login-btn btn-microsoft" onclick="app.signInWithMicrosoft()">
+        <svg viewBox="0 0 23 23" width="18" height="18">
+          <path fill="#f25022" d="M1 1h10v10H1z"/>
+          <path fill="#00a4ef" d="M12 1h10v10H12z"/>
+          <path fill="#7fba00" d="M1 12h10v10H1z"/>
+          <path fill="#ffb900" d="M12 12h10v10H12z"/>
+        </svg>
+        Continue with Microsoft
+      </button>
+    </div>
+
+    <div class="login-divider">or</div>
+
+    <p class="login-footer">
+      By signing in you agree to our Terms of Service.<br/>
+      Messages stored via Firebase · Auth via OAuth
+    </p>
   </div>
 </div>
 
-<!-- ══════════════ APP ══════════════ -->
+<!-- ══════════════════════════ APP ══════════════════════════ -->
 <div id="app">
+
   <!-- Server Rail -->
   <div id="server-rail">
-    <div class="server-icon active" onclick="selectServer('home')" title="Home" style="background:var(--accent); color:white; border-radius: var(--radius-lg);">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M2 12 Q6 4, 10 12 Q14 20, 18 12 Q20 7, 22 12" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
-    </div>
+    <!-- Home icon always present -->
+    <div class="server-icon active" data-sid="home" title="Home" onclick="app.selectServer('home')">💬</div>
     <div class="server-divider"></div>
-    <div class="server-icon" onclick="selectServer('dev')" title="Dev Den">⚙️</div>
-    <div class="server-icon" onclick="selectServer('design')" title="Design Space">🎨</div>
-    <div class="server-icon" onclick="selectServer('gaming')" title="Gaming Hub">🎮</div>
-    <div class="server-icon" onclick="selectServer('music')" title="Music Club">🎵</div>
-    <div class="server-divider"></div>
-    <div class="server-add" onclick="showToast('Server creation coming soon!')" title="Add Server">＋</div>
+    <!-- Dynamic server icons injected here -->
+    <div id="server-rail-icons"></div>
   </div>
 
   <!-- Channel Sidebar -->
   <div id="channel-sidebar">
     <div class="sidebar-header">
-      <span id="server-name">Chord HQ</span>
+      <span id="server-name">Chatly</span>
       <span class="chevron">▾</span>
     </div>
-    <div class="channel-list" id="channel-list">
-      <div class="channel-group-label">
-        <span>Text Channels</span>
-        <span class="add-ch" onclick="promptNewChannel()" title="Add Channel">＋</span>
-      </div>
-      <!-- Channels are rendered here -->
+
+    <div id="channel-list">
+      <!-- Populated by app.js -->
     </div>
-    <div class="sidebar-user-panel">
-      <div class="user-avatar" id="current-user-avatar">
+
+    <!-- User Panel -->
+    <div class="user-panel">
+      <div class="uav" id="current-user-avatar">
         <span class="status-dot"></span>
       </div>
-      <div class="user-info">
+      <div class="uinfo">
         <div class="uname" id="current-user-name">—</div>
         <div class="ustatus">Online</div>
       </div>
-      <button class="panel-btn" onclick="signOut()" title="Sign Out">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <button class="panel-btn" title="Sign Out" onclick="app.signOut()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
   </div>
 
   <!-- Main Chat -->
   <div id="main">
+
+    <!-- Header -->
     <div id="chat-header">
-      <div class="ch-name">
-        <span class="ch-hash-lrg">#</span>
+      <div class="header-channel">
+        <span class="header-hash">#</span>
         <span id="channel-title">general</span>
       </div>
-      <div class="ch-topic" id="channel-topic">Welcome to the general channel!</div>
+      <div id="channel-topic">Welcome to Chatly!</div>
       <div class="header-actions">
-        <button class="header-btn" title="Members" onclick="toggleMemberSidebar()">
-          <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.85"/></svg>
+        <button class="hdr-btn" title="Members" onclick="app.toggleMembers()">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         </button>
-        <button class="header-btn" title="Search" onclick="showToast('Search coming soon!')">
+        <button class="hdr-btn" title="Search" onclick="app.showToast('Search coming soon 🚧')">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
-        <button class="header-btn" title="Pin Messages" onclick="showToast('Pinned messages coming soon!')">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 00-1.11-1.79l-1.78-.9A2 2 0 0115 10.76V6h1a2 2 0 000-4H8a2 2 0 000 4h1v4.76a2 2 0 01-1.11 1.79l-1.78.9A2 2 0 005 15.24V17z"/></svg>
+        <button class="hdr-btn" title="Inbox" onclick="app.showToast('Notifications coming soon 🚧')">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </button>
       </div>
     </div>
 
+    <!-- Messages -->
     <div id="messages-area">
-      <div class="welcome-banner">
-        <div class="wb-icon">👋</div>
-        <h2>Welcome to #<span id="welcome-channel-name">general</span></h2>
-        <p>This is the start of the <strong>#<span id="welcome-channel-name2">general</span></strong> channel. Say hello!</p>
-      </div>
-      <!-- Messages rendered here -->
+      <!-- Populated by app.js -->
     </div>
 
+    <!-- Typing -->
     <div id="typing-indicator"></div>
 
-    <div id="message-input-area">
+    <!-- File preview strip -->
+    <div id="file-preview-bar" class="hidden"></div>
+
+    <!-- Upload progress -->
+    <div id="upload-progress" class="hidden"></div>
+
+    <!-- Input -->
+    <div id="message-input-area" style="position:relative">
       <div id="emoji-picker"></div>
       <div class="input-wrapper">
-        <button class="input-btn" title="Attach File" onclick="showToast('File upload coming soon!')">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <button class="inp-action" title="Attach File" onclick="app.openFilePicker()">
+          <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
         </button>
         <textarea
           id="message-input"
           rows="1"
           placeholder="Message #general"
-          onkeydown="handleKeyDown(event)"
-          oninput="handleInput(this)"
         ></textarea>
-        <button class="input-btn" title="Emoji" onclick="toggleEmojiPicker()">
+        <button class="inp-action" title="Emoji" data-emoji-toggle onclick="app.toggleEmojiPicker()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
         </button>
-        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+        <button id="send-btn" title="Send Message" onclick="app.sendMessage()">
           <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
     </div>
-  </div>
+
+  </div><!-- /#main -->
 
   <!-- Member Sidebar -->
   <div id="member-sidebar">
-    <div class="member-group-label">Online — <span id="online-count">0</span></div>
+    <div class="members-section-label">Online — <span id="online-count">0</span></div>
     <div id="online-members"></div>
-    <div class="member-group-label" style="margin-top:8px">Offline</div>
+    <div class="members-section-label" style="margin-top:10px">Offline</div>
     <div id="offline-members"></div>
   </div>
-</div>
+
+</div><!-- /#app -->
 
 <div id="toast"></div>
 
-<!-- ══════════════ FIREBASE SDK ══════════════ -->
-<script type="module">
-  // ─── Firebase Config ────────────────────────
-  // 🔧 REPLACE THESE WITH YOUR OWN FIREBASE CONFIG
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-  import {
-    getAuth,
-    GithubAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged,
-    signOut as fbSignOut
-  } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-  import {
-    getDatabase,
-    ref,
-    push,
-    onValue,
-    set,
-    serverTimestamp,
-    onDisconnect,
-    off,
-    query,
-    limitToLast,
-    orderByChild,
-    get
-  } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT.firebaseapp.com",
-    databaseURL:       "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-    projectId:         "YOUR_PROJECT",
-    storageBucket:     "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID"
-  };
-
-  // ─── App State ──────────────────────────────
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getDatabase(app);
-
-  let currentUser  = null;
-  let currentChannel = "general";
-  let msgListeners  = {};
-
-  const CHANNELS = [
-    { id: "general",    label: "general",    topic: "Chat about anything!" },
-    { id: "random",     label: "random",     topic: "Off-topic nonsense welcome" },
-    { id: "dev",        label: "development",topic: "Code, bugs, and caffeine" },
-    { id: "design",     label: "design",     topic: "Pixels and gradients" },
-    { id: "announcements", label: "announcements", topic: "Important updates" },
-  ];
-
-  const EMOJIS = ["😀","😂","🔥","❤️","👍","🎉","🤔","😎","💯","✨","🚀","😭","🙌","😍","⚡","🎨","🛠️","💡","🐛","🦄"];
-
-  // ─── Expose globals ──────────────────────────
-  window.signInWithGitHub = async () => {
-    try {
-      const provider = new GithubAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (e) {
-      showToast("Sign-in failed: " + e.message);
-    }
-  };
-
-  window.signOut = async () => {
-    if (currentUser) {
-      await set(ref(db, `presence/${currentUser.uid}`), null);
-    }
-    await fbSignOut(auth);
-  };
-
-  window.sendMessage = sendMessage;
-  window.handleKeyDown = handleKeyDown;
-  window.handleInput = handleInput;
-  window.selectChannel = selectChannel;
-  window.toggleEmojiPicker = toggleEmojiPicker;
-  window.toggleMemberSidebar = toggleMemberSidebar;
-  window.promptNewChannel = promptNewChannel;
-  window.showToast = showToast;
-  window.selectServer = selectServer;
-
-  // ─── Auth State ──────────────────────────────
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUser = user;
-      document.getElementById("login-screen").classList.add("hidden");
-      document.getElementById("app").classList.add("visible");
-      setupUserUI(user);
-      setupPresence(user);
-      setupChannels();
-      selectChannel("general");
-      setupPresenceListener();
-    } else {
-      currentUser = null;
-      document.getElementById("login-screen").classList.remove("hidden");
-      document.getElementById("app").classList.remove("visible");
-    }
-  });
-
-  function setupUserUI(user) {
-    const name = user.displayName || user.email.split("@")[0];
-    document.getElementById("current-user-name").textContent = name;
-    const avatarEl = document.getElementById("current-user-avatar");
-    if (user.photoURL) {
-      avatarEl.innerHTML = `<img src="${user.photoURL}" alt="You"><span class="status-dot"></span>`;
-    }
-  }
-
-  // ─── Presence ────────────────────────────────
-  function setupPresence(user) {
-    const presRef = ref(db, `presence/${user.uid}`);
-    const userData = {
-      displayName: user.displayName || user.email.split("@")[0],
-      photoURL: user.photoURL || "",
-      uid: user.uid,
-      online: true,
-      lastSeen: serverTimestamp()
-    };
-    set(presRef, userData);
-    onDisconnect(presRef).set({ ...userData, online: false });
-  }
-
-  function setupPresenceListener() {
-    const presRef = ref(db, "presence");
-    onValue(presRef, (snap) => {
-      const users = snap.val() || {};
-      renderMembers(users);
-    });
-  }
-
-  function renderMembers(users) {
-    const online = [], offline = [];
-    for (const u of Object.values(users)) {
-      if (u.online) online.push(u);
-      else offline.push(u);
-    }
-    document.getElementById("online-count").textContent = online.length;
-
-    const mkItem = (u) => {
-      const initials = (u.displayName || "?").charAt(0).toUpperCase();
-      const avatar = u.photoURL
-        ? `<img src="${u.photoURL}" alt="${u.displayName}">`
-        : `<span style="font-size:14px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;height:100%;background:var(--accent-dim)">${initials}</span>`;
-      return `<div class="member-item">
-        <div class="member-avatar">
-          ${avatar}
-          <div class="member-status ${u.online ? 'online' : 'offline'}"></div>
-        </div>
-        <span class="member-name">${escHtml(u.displayName || "Unknown")}</span>
-      </div>`;
-    };
-
-    document.getElementById("online-members").innerHTML = online.map(mkItem).join("");
-    document.getElementById("offline-members").innerHTML = offline.slice(0, 10).map(mkItem).join("");
-  }
-
-  // ─── Channels ────────────────────────────────
-  function setupChannels() {
-    const list = document.getElementById("channel-list");
-    list.innerHTML = `<div class="channel-group-label">
-      <span>Text Channels</span>
-      <span class="add-ch" onclick="promptNewChannel()" title="Add Channel">＋</span>
-    </div>`;
-    CHANNELS.forEach(ch => {
-      const el = document.createElement("div");
-      el.className = "channel-item" + (ch.id === currentChannel ? " active" : "");
-      el.id = "ch-" + ch.id;
-      el.innerHTML = `<span class="ch-hash">#</span><span>${escHtml(ch.label)}</span>`;
-      el.onclick = () => selectChannel(ch.id);
-      list.appendChild(el);
-    });
-  }
-
-  function selectChannel(id) {
-    const ch = CHANNELS.find(c => c.id === id);
-    if (!ch) return;
-
-    // Update UI
-    document.querySelectorAll(".channel-item").forEach(el => el.classList.remove("active"));
-    const el = document.getElementById("ch-" + id);
-    if (el) el.classList.add("active");
-
-    currentChannel = id;
-    document.getElementById("channel-title").textContent = ch.label;
-    document.getElementById("channel-topic").textContent = ch.topic || "";
-    document.getElementById("welcome-channel-name").textContent = ch.label;
-    document.getElementById("welcome-channel-name2").textContent = ch.label;
-    document.getElementById("message-input").placeholder = `Message #${ch.label}`;
-
-    // Clear old listener
-    if (msgListeners[currentChannel]) {
-      off(ref(db, `messages/${id}`));
-    }
-
-    // Load messages
-    const msgRef = query(ref(db, `messages/${id}`), orderByChild("ts"), limitToLast(80));
-    onValue(msgRef, (snap) => renderMessages(snap.val()), { onlyOnce: false });
-    msgListeners[id] = true;
-  }
-
-  // ─── Render Messages ─────────────────────────
-  let lastRenderedDate = "";
-
-  function renderMessages(msgs) {
-    const area = document.getElementById("messages-area");
-    const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
-
-    const ch = CHANNELS.find(c => c.id === currentChannel);
-
-    // Keep welcome banner
-    const banner = `<div class="welcome-banner">
-      <div class="wb-icon">👋</div>
-      <h2>Welcome to #${escHtml(ch?.label || currentChannel)}</h2>
-      <p>This is the start of the <strong>#${escHtml(ch?.label || currentChannel)}</strong> channel. Say hello!</p>
-    </div>`;
-
-    if (!msgs) { area.innerHTML = banner; return; }
-
-    const sorted = Object.entries(msgs).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0));
-    let html = banner;
-    let lastDate = "";
-    let lastAuthorUid = "";
-    let lastTs = 0;
-
-    for (const [id, msg] of sorted) {
-      const d = new Date((msg.ts || Date.now()));
-      const dateStr = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-      const timeStr = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-
-      if (dateStr !== lastDate) {
-        html += `<div class="date-divider">${escHtml(dateStr)}</div>`;
-        lastDate = dateStr;
-        lastAuthorUid = "";
-      }
-
-      const isContinued = msg.uid === lastAuthorUid && (msg.ts - lastTs) < 300000;
-      lastAuthorUid = msg.uid;
-      lastTs = msg.ts || 0;
-
-      const initials = (msg.displayName || "?").charAt(0).toUpperCase();
-      const avatarHtml = msg.photoURL
-        ? `<img src="${escHtml(msg.photoURL)}" alt="">`
-        : `<div style="display:flex;align-items:center;justify-content:center;height:100%;background:var(--accent-dim);font-weight:700;font-size:15px;color:white">${initials}</div>`;
-
-      if (!isContinued) {
-        html += `<div class="message-group">
-          <div class="msg-avatar">${avatarHtml}</div>
-          <div class="msg-body">
-            <div class="msg-meta">
-              <span class="msg-author">${escHtml(msg.displayName || "Unknown")}</span>
-              <span class="msg-time">${escHtml(timeStr)}</span>
-            </div>
-            <div class="msg-content">${formatContent(msg.text || "")}</div>
-          </div>
-        </div>`;
-      } else {
-        html += `<div class="message-group" style="padding-left:72px;">
-          <div class="msg-body">
-            <div class="msg-content">${formatContent(msg.text || "")}</div>
-          </div>
-        </div>`;
-      }
-    }
-
-    area.innerHTML = html;
-    if (wasAtBottom) area.scrollTop = area.scrollHeight;
-  }
-
-  function formatContent(text) {
-    return escHtml(text)
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`(.+?)`/g, "<code>$1</code>")
-      .replace(/\n/g, "<br>");
-  }
-
-  function escHtml(s) {
-    return String(s)
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;");
-  }
-
-  // ─── Send Message ────────────────────────────
-  async function sendMessage() {
-    if (!currentUser) return;
-    const input = document.getElementById("message-input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    input.value = "";
-    input.style.height = "auto";
-    updateSendBtn();
-
-    try {
-      await push(ref(db, `messages/${currentChannel}`), {
-        text,
-        uid: currentUser.uid,
-        displayName: currentUser.displayName || currentUser.email.split("@")[0],
-        photoURL: currentUser.photoURL || "",
-        ts: Date.now()
-      });
-    } catch (e) {
-      showToast("Failed to send message");
-    }
-  }
-
-  function handleKeyDown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }
-
-  function handleInput(el) {
-    el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 180) + "px";
-    updateSendBtn();
-  }
-
-  function updateSendBtn() {
-    const btn = document.getElementById("send-btn");
-    const val = document.getElementById("message-input").value.trim();
-    btn.classList.toggle("active", val.length > 0);
-  }
-
-  // ─── Emoji Picker ────────────────────────────
-  function toggleEmojiPicker() {
-    const picker = document.getElementById("emoji-picker");
-    if (!picker.innerHTML) {
-      picker.innerHTML = EMOJIS.map(e =>
-        `<button class="emoji-btn" onclick="insertEmoji('${e}')">${e}</button>`
-      ).join("");
-    }
-    picker.classList.toggle("open");
-  }
-
-  window.insertEmoji = (e) => {
-    const input = document.getElementById("message-input");
-    input.value += e;
-    input.focus();
-    updateSendBtn();
-    document.getElementById("emoji-picker").classList.remove("open");
-  };
-
-  // ─── Member Sidebar Toggle ───────────────────
-  function toggleMemberSidebar() {
-    const s = document.getElementById("member-sidebar");
-    s.style.display = s.style.display === "none" ? "" : "none";
-  }
-
-  // ─── New Channel ─────────────────────────────
-  function promptNewChannel() {
-    const name = prompt("New channel name:");
-    if (!name) return;
-    const id = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-    if (!id) return;
-    CHANNELS.push({ id, label: id, topic: `#${id} channel` });
-    setupChannels();
-    selectChannel(id);
-  }
-
-  // ─── Server Selector ─────────────────────────
-  const SERVER_NAMES = {
-    home: "Chord HQ",
-    dev: "Dev Den 🛠️",
-    design: "Design Space 🎨",
-    gaming: "Gaming Hub 🎮",
-    music: "Music Club 🎵"
-  };
-  function selectServer(id) {
-    document.querySelectorAll(".server-icon").forEach(el => el.classList.remove("active"));
-    event.currentTarget.classList.add("active");
-    document.getElementById("server-name").textContent = SERVER_NAMES[id] || id;
-    showToast(`Switched to ${SERVER_NAMES[id] || id}`);
-  }
-
-  // ─── Toast ───────────────────────────────────
-  window.showToast = function(msg, duration = 2500) {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), duration);
-  };
-
-  // Close emoji picker on outside click
-  document.addEventListener("click", (e) => {
-    const picker = document.getElementById("emoji-picker");
-    if (picker.classList.contains("open") && !picker.contains(e.target) && !e.target.closest(".input-btn")) {
-      picker.classList.remove("open");
-    }
-  });
-</script>
+<!-- Load app as ES module -->
+<script type="module" src="app.js"></script>
 </body>
 </html>

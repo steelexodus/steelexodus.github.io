@@ -1,1 +1,113 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #2b2d31;
+  color: white;
+}
 
+.hidden {
+  display: none;
+}
+
+#authScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 10px;
+}
+
+#authScreen input {
+  padding: 10px;
+  width: 250px;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+#sidebar {
+  width: 250px;
+  background: #1e1f22;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+#roomList {
+  list-style: none;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+#roomList li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+#roomList li:hover {
+  background: #2b2d31;
+}
+
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.message {
+  margin-bottom: 10px;
+}
+
+.message strong {
+  color: #5865F2;
+}
+
+#typingIndicator {
+  font-size: 0.8rem;
+  color: #aaa;
+  padding-left: 20px;
+}
+
+#inputArea {
+  display: flex;
+  padding: 10px;
+  background: #232428;
+}
+
+#messageInput {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+}
+
+button {
+  padding: 10px;
+  margin-left: 5px;
+  background: #5865F2;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  #sidebar {
+    width: 180px;
+  }
+}
